@@ -1,0 +1,21 @@
+.env
+.venv*
+venv*
+.vscode/
+
+# dbt
+logs/
+out/
+package-lock.yml
+target/
+dbt_packages/
+
+# dagster specific
+**/__pycache__/
+*.pyc
+tmp*/
+tmp*
+archive
+
+# cp ~/.dbt/profiles.yml .
+profiles.yml

@@ -1,0 +1,31 @@
+models:
+  - name: mart_full_moon_reviews
+    description: The 'mart_full_moon_reviews' model is a combination of the 'fct_reviews' and 'seed_full_moon_dates' tables from the AIRBNB.DEV schema. It includes all columns from the 'fct_reviews' table and adds a new boolean column 'is_full_moon', which indicates whether the review was made the day after a full moon. The 'is_full_moon' column is determined by joining the 'fct_reviews' table with the 'seed_full_moon_dates' table on the review date.
+    columns:
+      - name: review_id
+        description: This is a unique identifier for each review. It is a primary key in the fct_reviews table.
+        data_type: varchar
+
+      - name: listing_id
+        description: This is a unique identifier for each listing. It is a foreign key that links to the listings table.
+        data_type: number
+
+      - name: review_date
+        description: The date when the review was made. It is of timestamp_ntz data type, which means it is a timestamp that does not have a timezone associated with it.
+        data_type: timestamp_ntz
+
+      - name: reviewer_name
+        description: The name of the individual who has written the review. This is a string field and can contain any alphanumeric characters.
+        data_type: varchar
+
+      - name: review_text
+        description: The actual text of the review written by the reviewer. This is a string field and can contain any alphanumeric characters, special characters, and spaces.
+        data_type: varchar
+
+      - name: review_sentiment
+        description: The sentiment of the review text. This is a string field and can contain values such as 'Positive', 'Negative', or 'Neutral' based on the sentiment analysis of the review text.
+        data_type: varchar
+
+      - name: is_full_moon
+        description: A boolean column that indicates whether the review was made a day after a full moon. If the review date matches a date that is one day after a full moon date, the value is true; otherwise, it is false.
+        data_type: boolean

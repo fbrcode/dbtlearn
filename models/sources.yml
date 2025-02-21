@@ -1,0 +1,41 @@
+version: 2
+
+# adds an abstraction on top of the raw layer, referencing raw data as source data
+sources:
+  - name: airbnb # source namespace for this project
+    schema: raw # schema where the sources are located
+    tables: # list of tables and their aliases
+      - name: listings
+        identifier: raw_listings
+        columns:
+          - name: room_type
+            description: "Type of room / apartment available for rent."
+            tests:
+              - not_null
+              - dbt_expectations.expect_column_distinct_count_to_equal:
+                  value: 4
+              - accepted_values:
+                  values:
+                    [
+                      "Entire home/apt",
+                      "Private room",
+                      "Shared room",
+                      "Hotel room",
+                    ]
+
+          - name: price
+            description: "Price of the listing."
+            tests:
+              - not_null
+              - dbt_expectations.expect_column_values_to_match_regex:
+                  regex: "^\\\\$[0-9][0-9\\\\.]+$"
+
+      - name: hosts
+        identifier: raw_hosts
+
+      - name: reviews
+        identifier: raw_reviews
+        loaded_at_field: date # define what field to use for freshness
+        freshness:
+          warn_after: { count: 1, period: hour } # warn if the data is older than 1 hour
+          error_after: { count: 24, period: hour } # error if the data is older than 24 hours

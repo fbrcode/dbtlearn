@@ -1,0 +1,145 @@
+version: 2
+
+models:
+  # end user models
+  - name: dim_listings_cleansed
+    description: "Cleansed table with Airbnb rental listings."
+    columns:
+      - name: listing_id
+        description: "Unique identifier for a listing."
+        tests:
+          - unique
+          - not_null
+
+      - name: host_id
+        description: "Identifier for an Airbnb host. References the host table."
+        tests:
+          - not_null
+          - relationships: # ensure that the host_id exists in the hosts table
+              to: ref('dim_hosts_cleansed')
+              field: host_id
+
+      - name: room_type
+        description: "Type of room / apartment available for rent"
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                ["Entire home/apt", "Private room", "Shared room", "Hotel room"]
+
+      - name: minimum_nights
+        description: '{{ doc("dim_listing_cleansed__minimum_nights") }}'
+        tests:
+          - not_null
+          - positive_value
+
+  - name: dim_hosts_cleansed
+    description: "Cleansed table with Airbnb hosts."
+    columns:
+      - name: host_id
+        description: "Unique identifier for a host."
+        tests:
+          - unique
+          - not_null
+
+      - name: host_name
+        description: "Name of the host."
+        tests:
+          - not_null
+
+      - name: is_superhost
+        description: "Indicates if the host is a superhost."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["t", "f"]
+
+  - name: dim_listings_w_hosts
+    description: "Table with Airbnb rental listings and host information."
+    tests:
+      - dbt_expectations.expect_table_row_count_to_equal_other_table:
+          compare_model: source("airbnb", "listings")
+
+    columns:
+      - name: listing_id
+        description: "Unique identifier for a listing."
+        tests:
+          - unique
+          - not_null
+
+      - name: host_id
+        description: "Identifier for an Airbnb host. References the hosts table."
+        tests:
+          - not_null
+          - relationships: # ensure that the host_id exists in the hosts table
+              to: ref('dim_hosts_cleansed')
+              field: host_id
+
+      - name: room_type
+        description: "Type of room / apartment available for rent."
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                ["Entire home/apt", "Private room", "Shared room", "Hotel room"]
+
+      - name: host_name
+        description: "Name of the host."
+        tests:
+          - not_null
+
+      - name: price
+        description: "Price per night for the listing."
+        tests:
+          - not_null
+          # test to spot outliers: we expect 99% of the listing price to be between 50 and 500
+          - dbt_expectations.expect_column_quantile_values_to_be_between:
+              quantile: .99
+              min_value: 50
+              max_value: 500
+          - dbt_expectations.expect_column_max_to_be_between:
+              max_value: 5000
+              config:
+                severity: warn
+          - dbt_expectations.expect_column_max_to_be_between:
+              max_value: 10000
+              config:
+                severity: error
+          - dbt_expectations.expect_column_min_to_be_between:
+              min_value: 1
+              config:
+                severity: warn
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: number
+
+  - name: fct_reviews
+    description: "Fact table with Airbnb reviews."
+    columns:
+      - name: review_id
+        description: "Unique identifier for a review."
+        tests:
+          - unique
+          - not_null
+
+      - name: listing_id
+        description: "Identifier for an Airbnb listing. References the listings table."
+        tests:
+          - not_null
+          - relationships: # ensure that the listing_id exists in the listings table
+              to: ref('dim_listings_cleansed')
+              field: listing_id
+
+      - name: review_date
+        description: "Date when the review was created."
+        tests:
+          - not_null
+
+      - name: reviewer_name
+        description: "Name of the reviewer."
+        tests:
+          - not_null
+
+      - name: review_text
+        description: "Text of the review."
+        tests:
+          - not_null
