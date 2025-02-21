@@ -3,11 +3,11 @@
 from setuptools import find_packages, setup
 
 setup(
-    name="dagster_dbt_airbnb",
+    name="_dagster_dbt_project",
     version="0.0.1",
     packages=find_packages(),
     package_data={
-        "dagster_dbt_airbnb": [
+        "_dagster_dbt_project": [
             "dbt-project/**/*",
         ],
     },

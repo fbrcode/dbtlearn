@@ -1152,3 +1152,20 @@ dbt run --select fct_reviews --vars '{start_date: "2024-02-15 00:00:00", end_dat
 Orchestration is the process of automating the execution of dbt commands.
 
 The tool we'll be using is `dagster` <https://dagster.io/> to orchestrate dbt.
+
+#### Create a new dagster project
+
+Make sure you `cp ~/.dbt/profiles.yml .` to the project root and add it to `.gitignore` to not sync credentials.
+
+```bash
+dagster-dbt project scaffold --project-name '_dagster_dbt_project' --dbt-project-dir='../dbtlearn'
+```
+
+#### Run the dagster project
+
+```bash
+cd _dagster_dbt_project
+dagster dev
+```
+
+Open the browser at <http://localhost:3000> and you will see the dagster dashboard.
